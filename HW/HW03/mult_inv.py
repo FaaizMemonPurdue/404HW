@@ -8,6 +8,7 @@ from BitVector import *
 def binDivision(dividend, divisor, modulus):
     dividend = dividend % modulus
     divisor = divisor % modulus #force both pos
+    if not dividend: dividend = modulus
     if not divisor: divisor = modulus
     if divisor > dividend: return (0, dividend) #self-explanatory
     
@@ -30,20 +31,24 @@ def binDivision(dividend, divisor, modulus):
     return (quotient % modulus, remainder % modulus)
 
 def binMult(factor1, factor2, modulus): 
-    factor1 %= modulus
-    factor2 %= modulus
+    if factor1 % modulus: factor1 %= modulus
+    if factor2 % modulus: factor2 %= modulus
+    
+    # factor2 %= modulus
     if(factor1 > factor2):
         skeleton = BitVector(intVal = factor2)
-        mover = factor1
+        mover = BitVector(intVal = factor1)
     else:
         skeleton = BitVector(intVal = factor1)
-        mover = factor1
-    power = skeleton.size
+        mover = BitVector(intVal = factor2)
+    power = skeleton.size - 1
+    mover.pad_from_right(power)
     acc = 0
     for bit in skeleton:
         if bit:
-            acc += (mover << power)
+            acc += mover.int_val()
         power -= 1
+        mover.shift_right(1)
     return (acc % modulus)
 
 def MI(num, mod):
@@ -52,29 +57,28 @@ def MI(num, mod):
     Extended Euclid’s Algorithm to find the MI of the first-arg integer
     vis-a-vis the second-arg integer.
     '''
-    if (not mod) or (not num % mod): return 0 #num is a direct multiple of mod
+    if (not mod) or (not num % mod): 
+        print("Additive Identity Entered, no MI")
+        return 0 #num is a direct multiple of mod
     
     NUM = num; MOD = mod
     x, x_old = 0, 1
     y, y_old = 1, 0
     while mod:
+
+        num, (q, mod) = mod, binDivision(num, mod, MOD)
         
-        q = num // mod
-      
-        num, mod = mod, num % mod
-        # 
-        # num, (q, mod) = mod, binDivision(num, mod, MOD)
-        # num = mod
         
-        x, x_old = x_old - q * x, x
-        y, y_old = y_old - q * y, y
+        x, x_old = x_old - binMult(q, x, MOD), x
+        
+        # x, x_old = x_old - q * x, x
+        y, y_old = y_old - binMult(q, y, MOD), y
     if num != 1:
         print("\nNO MI. However, the GCD of %d and %d is %u\n" % (NUM, MOD, num))
     else:
         MI = (x_old + MOD) % MOD
         print("\nMI of %d modulo %d is: %d\n" % (NUM, MOD, MI))
 
-MI(5, 17)
 
 if len(sys.argv) != 3:
     sys.stderr.write("Usage: %s <integer> <modulus>\n" % sys.argv[0])
