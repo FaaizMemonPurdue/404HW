@@ -34,9 +34,10 @@ def genTables():
         check = b.gf_MI(AES_modulus, 8)
         b = check if isinstance(check, BitVector) else 0
         invSubBytesTable.append(int(b))
+    return subBytesTable, invSubBytesTable
 
-genTables()
-print "SBox for Encryption:"
-print subBytesTable
-print "\nSBox for Decryption:"
-print invSubBytesTable
+"""genTables()
+print("SBox for Encryption:")
+print(subBytesTable)
+print("\nSBox for Decryption:")
+print(invSubBytesTable)"""
